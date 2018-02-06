@@ -116,9 +116,11 @@ class SnakeEnv(gym.Env):
                           font_name='Times New Roman',
                           font_size=36,
                           x=WINDOW_W//2, y=WINDOW_H//2,
+                          color=(0,0,0,100),
                           anchor_x='center', anchor_y='center')
-            label.draw()
+            self.viewer.add_geom(label)
             self.transform = rendering.Transform()
+        self.viewer.render()
 
 
     def close(self):

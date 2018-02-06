@@ -3,6 +3,8 @@
 import pyglet
 from pyglet.gl import *
 
+RAD2DEG = 2
+
 class Viewer(object):
     def __init__(self, width, height):
         self.width = width
@@ -44,9 +46,9 @@ class Viewer(object):
         self.window.dispatch_events()
         self.transform.enable()
         for geom in self.geoms:
-            geom.render()
+            geom.draw()
         for geom in self.onetime_geoms:
-            geom.render()
+            geom.draw()
         self.transform.disable()
         arr = None
         if return_rgb_array:
