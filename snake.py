@@ -11,10 +11,14 @@ VIDEO_W = 300
 VIDEO_H = 300
 WINDOW_W = 600
 WINDOW_H = 600
+BORDER_SIZE = 20
 
 SCALE = WINDOW_W/STATE_W
 
 INIT_SNAKE_LENGTH = 3
+BORDER_COLOR = (0,0,0)
+SNAKE_COLOR = (0,255,0)
+FOOD_COLOR = (255,0,0)
 
 DIRECTIONS_DICT = {
     0: (0,0),
@@ -112,14 +116,17 @@ class SnakeEnv(gym.Env):
         if self.viewer is None:
             import rendering
             self.viewer = rendering.Viewer(WINDOW_W, WINDOW_H)
-            label = pyglet.text.Label('Hello, world',
-                          font_name='Times New Roman',
-                          font_size=36,
-                          x=WINDOW_W//2, y=WINDOW_H//2,
-                          color=(0,0,0,100),
-                          anchor_x='center', anchor_y='center')
-            self.viewer.add_geom(label)
+            border = rendering.Border(WINDOW_W, WINDOW_H, BORDER_SIZE, BORDER_COLOR)
+            self.plotter = rendering.Plotter(
+                WINDOW_W, WINDOW_H, BORDER_SIZE, STATE_W, STATE_H
+            )
+            self.viewer.add_geom(border)
+            self.viewer.add_geom(self.plotter)
             self.transform = rendering.Transform()
+
+        plot_points = [(x,y,SNAKE_COLOR) for x,y in self.snake]
+        plot_points.append((self.food[0], self.food[1], FOOD_COLOR))
+        self.plotter.update_points(plot_points)
         self.viewer.render()
 
 

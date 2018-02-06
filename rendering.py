@@ -3,7 +3,7 @@
 import pyglet
 from pyglet.gl import *
 
-RAD2DEG = 2
+RAD2DEG = 57.29577951308232
 
 class Viewer(object):
     def __init__(self, width, height):
@@ -86,3 +86,56 @@ class Transform:
         self.rotation = float(new)
     def set_scale(self, newx, newy):
         self.scale = (float(newx), float(newy))
+
+
+class Border:
+    def __init__(self, window_w, window_h, border_w, color):
+        tl_outer=(window_w,window_h)
+        tl_inner=(window_w-border_w, window_h-border_w)
+        tr_outer=(0,window_h)
+        tr_inner=(border_w,window_h-border_w)
+        bl_outer=(window_w,0)
+        bl_inner=(window_w-border_w,border_w)
+        br_outer=(0,0)
+        br_inner=(border_w,border_w)
+        data=tl_outer+tl_inner+tr_outer+tr_inner+br_outer+br_inner+bl_outer+bl_inner+tl_outer+tl_inner
+        top_indices=[0,1,3,2]
+        left_indices=[0,1,5,4]
+        right_indices=[2,3,7,6]
+        bottom_indices=[4,5,7,6]
+        indices=top_indices+right_indices+bottom_indices+left_indices
+        color_list=color*10
+        self.vertex_list = pyglet.graphics.vertex_list(10,
+            ('v2f', data),
+            ('c3B', color_list)
+        )
+    def draw(self):
+        self.vertex_list.draw(GL_QUAD_STRIP)
+
+class Plotter:
+    def __init__(self, window_w, window_h, border_w, state_w, state_h, point_list=[]):
+        self.x0=border_w
+        self.y0=border_w
+        self.x_max=state_w-1
+        self.dx=(window_w-2*border_w)//state_w
+        self.dy=(window_h-2*border_w)//state_h
+        self.point_list=point_list
+    def _get_vertices(self,x,y):
+        x0,y0 = self.x0, self.y0
+        dx,dy = self.dx, self.dy
+        tl=((x+1)*dx+x0, (y+1)*dy+y0)
+        tr=(x*dx+x0, (y+1)*dy+y0)
+        bl=((x+1)*dx+x0, y*dy+y0)
+        br=(x*dx+x0, y*dy+y0)
+        return tl+tr+br+bl
+    def update_points(self, point_list):
+        self.point_list=point_list
+    def draw(self):
+        if (self.point_list is None): return
+        for x_inv,y,c in self.point_list:
+            x=self.x_max-x_inv #invert x for sanity
+            vertex_list=self._get_vertices(x,y)
+            pyglet.graphics.draw(4, GL_QUADS,
+                ('v2f',vertex_list),
+                ('c3B',c*4)
+            )
