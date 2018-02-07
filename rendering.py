@@ -132,8 +132,7 @@ class Plotter:
         self.point_list=point_list
     def draw(self):
         if (self.point_list is None): return
-        for x_inv,y,c in self.point_list:
-            x=self.x_max-x_inv #invert x for sanity
+        for x,y,c in self.point_list:
             vertex_list=self._get_vertices(x,y)
             pyglet.graphics.draw(4, GL_QUADS,
                 ('v2f',vertex_list),

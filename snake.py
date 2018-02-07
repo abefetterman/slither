@@ -31,7 +31,7 @@ DIRECTIONS_DICT = {
 class SnakeEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array', 'state_pixels'],
-        'video.frames_per_second': 30
+        'video.frames_per_second': 5
     }
 
     def __init__(self):
@@ -74,7 +74,6 @@ class SnakeEnv(gym.Env):
 
         if (action > 0):
             self.snake_dir = action
-
         cx,cy = self.snake[0]
         dx, dy = DIRECTIONS_DICT[self.snake_dir]
 
@@ -107,8 +106,8 @@ class SnakeEnv(gym.Env):
                 self.snake.pop()
 
 
-        self.state = self._render()[0]
-        return np.array(self.state), reward, done, {}
+        #self.state = self.render()[0]
+        return np.array([]), reward, done, {}
 
 
     def render(self, mode='human'):
@@ -136,8 +135,32 @@ class SnakeEnv(gym.Env):
 
 if __name__=="__main__":
     env = SnakeEnv()
+    pyglet.clock.set_fps_limit(5)
+    from pyglet.window import key
+    global a
+    a = 0
+    def key_press(k, mod):
+        global restart
+        global a
+        if k==key.R: restart = True
+        if k==key.UP:    a=1
+        if k==key.DOWN:  a=2
+        if k==key.LEFT:  a=3
+        if k==key.RIGHT: a=4
+    env.render()
+    env.viewer.window.on_key_press = key_press
     try:
         while True:
-            env.render()
+            env.reset()
+            total_reward = 0.0
+            steps = 0
+            restart = False
+            while True:
+                pyglet.clock.tick()
+                s,r,done,info = env.step(a)
+                total_reward += r
+                steps += 1
+                env.render()
+                if restart: break
     except (KeyboardInterrupt):
         env.close()
