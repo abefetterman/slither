@@ -138,7 +138,7 @@ class SnakeEnv(gym.Env):
 
 if __name__=="__main__":
     env = SnakeEnv()
-    pyglet.clock.set_fps_limit(5)
+    pyglet.clock.set_fps_limit(10)
     from pyglet.window import key
     global a
     a = np.random.randint(4)
