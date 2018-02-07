@@ -5,8 +5,8 @@ from gym.utils import seeding
 import numpy as np
 import pyglet
 
-STATE_W = 30
-STATE_H = 30
+STATE_W = 20
+STATE_H = 20
 VIDEO_W = 300
 VIDEO_H = 300
 WINDOW_W = 600
@@ -15,15 +15,15 @@ BORDER_SIZE = 20
 
 INIT_SNAKE_LENGTH = 3
 BORDER_COLOR = (0,0,0)
-SNAKE_COLOR = (0,255,0)
+SNAKE_COLOR = (0,200,0)
+SNAKE_HEAD_COLOR = (0,255,0)
 FOOD_COLOR = (255,0,0)
 
 DIRECTIONS_DICT = {
-    0: (0,0),
-    1: (0,1),
-    2: (0,-1),
-    3: (-1,0),
-    4: (1,0)
+    0: (0,1),
+    1: (0,-1),
+    2: (-1,0),
+    3: (1,0)
 }
 
 class SnakeEnv(gym.Env):
@@ -36,7 +36,7 @@ class SnakeEnv(gym.Env):
         self.viewer = None
         self.snake = None
 
-        self.action_space = spaces.Discrete(5) #none, u, d, l, r
+        self.action_space = spaces.Discrete(4) #u, d, l, r
         self.observation_space = spaces.Box(low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8)
 
         self.plot_sparse = []
@@ -52,8 +52,6 @@ class SnakeEnv(gym.Env):
         length = INIT_SNAKE_LENGTH
         init_x = self.np_random.randint(STATE_W - 2*length) + length
         init_y = self.np_random.randint(STATE_H - 2*length) + length
-        self.snake_dir = 1+self.np_random.randint(4)
-        dx, dy = DIRECTIONS_DICT[self.snake_dir]
 
         self.snake = [(init_x, init_y)]
         self.snake_length = length
@@ -72,10 +70,8 @@ class SnakeEnv(gym.Env):
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
 
-        if (action > 0):
-            self.snake_dir = action
         cx,cy = self.snake[0]
-        dx, dy = DIRECTIONS_DICT[self.snake_dir]
+        dx, dy = DIRECTIONS_DICT[action]
 
         head = (cx + dx, cy + dy)
 
@@ -107,8 +103,11 @@ class SnakeEnv(gym.Env):
 
         return self._update_state(), reward, done, {}
 
+    def _snake_color(self,x,y):
+        if (x,y)==self.snake[0]: return SNAKE_HEAD_COLOR
+        return SNAKE_COLOR
     def _update_state(self):
-        self.plot_sparse = [(x,y,SNAKE_COLOR) for x,y in self.snake]
+        self.plot_sparse = [(x,y,self._snake_color(x,y)) for x,y in self.snake]
         self.plot_sparse.append((self.food[0], self.food[1], FOOD_COLOR))
         self.state = self.state*0
         for x,y,c in self.plot_sparse:
@@ -142,15 +141,15 @@ if __name__=="__main__":
     pyglet.clock.set_fps_limit(5)
     from pyglet.window import key
     global a
-    a = 0
+    a = np.random.randint(4)
     def key_press(k, mod):
         global restart
         global a
         if k==key.R: restart = True
-        if k==key.UP:    a=1
-        if k==key.DOWN:  a=2
-        if k==key.LEFT:  a=3
-        if k==key.RIGHT: a=4
+        if k==key.UP:    a=0
+        if k==key.DOWN:  a=1
+        if k==key.LEFT:  a=2
+        if k==key.RIGHT: a=3
     env.render()
     env.viewer.window.on_key_press = key_press
     try:
