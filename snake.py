@@ -13,8 +13,6 @@ WINDOW_W = 600
 WINDOW_H = 600
 BORDER_SIZE = 20
 
-SCALE = WINDOW_W/STATE_W
-
 INIT_SNAKE_LENGTH = 3
 BORDER_COLOR = (0,0,0)
 SNAKE_COLOR = (0,255,0)
@@ -30,7 +28,7 @@ DIRECTIONS_DICT = {
 
 class SnakeEnv(gym.Env):
     metadata = {
-        'render.modes': ['human', 'rgb_array', 'state_pixels'],
+        'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 5
     }
 
@@ -41,6 +39,8 @@ class SnakeEnv(gym.Env):
         self.action_space = spaces.Discrete(5) #none, u, d, l, r
         self.observation_space = spaces.Box(low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8)
 
+        self.plot_sparse = []
+        self.state = np.zeros((STATE_H, STATE_W, 3), dtype=np.uint8)
         self.seed()
         self.reset()
 
@@ -60,7 +60,7 @@ class SnakeEnv(gym.Env):
 
         self._place_food()
 
-        #return self._render()[0]
+        return self._update_state()
 
     def _place_food(self):
         self.food = self.snake[0]
@@ -105,10 +105,15 @@ class SnakeEnv(gym.Env):
             while (len(self.snake) > self.snake_length):
                 self.snake.pop()
 
+        return self._update_state(), reward, done, {}
 
-        #self.state = self.render()[0]
-        return np.array([]), reward, done, {}
-
+    def _update_state(self):
+        self.plot_sparse = [(x,y,SNAKE_COLOR) for x,y in self.snake]
+        self.plot_sparse.append((self.food[0], self.food[1], FOOD_COLOR))
+        self.state = self.state*0
+        for x,y,c in self.plot_sparse:
+            self.state[x,y]=c
+        return self.state
 
     def render(self, mode='human'):
 
@@ -123,9 +128,8 @@ class SnakeEnv(gym.Env):
             self.viewer.add_geom(self.plotter)
             self.transform = rendering.Transform()
 
-        plot_points = [(x,y,SNAKE_COLOR) for x,y in self.snake]
-        plot_points.append((self.food[0], self.food[1], FOOD_COLOR))
-        self.plotter.update_points(plot_points)
+
+        self.plotter.update_points(self.plot_sparse)
         self.viewer.render()
 
 
