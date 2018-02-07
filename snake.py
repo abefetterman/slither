@@ -5,13 +5,12 @@ from gym.utils import seeding
 import numpy as np
 import pyglet
 
-STATE_W = 20
-STATE_H = 20
-VIDEO_W = 300
-VIDEO_H = 300
-WINDOW_W = 600
-WINDOW_H = 600
+STATE_W = 15
+STATE_H = 15
+BLOCK_SIZE = 20
 BORDER_SIZE = 20
+WINDOW_W = STATE_W*BLOCK_SIZE + 2*BORDER_SIZE
+WINDOW_H = STATE_H*BLOCK_SIZE + 2*BORDER_SIZE
 
 INIT_SNAKE_LENGTH = 3
 BORDER_COLOR = (0,0,0)
@@ -164,6 +163,6 @@ if __name__=="__main__":
                 total_reward += r
                 steps += 1
                 env.render()
-                if restart: break
+                if (restart or done): break
     except (KeyboardInterrupt):
         env.close()
