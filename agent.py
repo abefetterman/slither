@@ -15,7 +15,9 @@ total_frames = 0
 total_reward = 0
 
 FloatTensor = torch.FloatTensor
-if (cuda): FloatTensor = torch.cuda.FloatTensor
+if (cuda):
+    FloatTensor = torch.cuda.FloatTensor
+    model = model.cuda()
 # converts hwc to bchw:
 tensorize = lambda t: FloatTensor(t.transpose((2,0,1))).unsqueeze(0)
 

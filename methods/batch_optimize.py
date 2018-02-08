@@ -9,6 +9,8 @@ class BatchOptimizer(object):
         self.buffer = ReplayBuffer(buffer_size, cuda=cuda)
         self.gamma = 0.9
         self.criterion = torch.nn.SmoothL1Loss()
+        if cuda:
+            self.criterion = self.criterion.cuda()
         self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
         self.cuda = cuda
 
