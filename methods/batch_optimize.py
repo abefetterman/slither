@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from replay_buffer import ReplayBuffer
+from methods.replay_buffer import ReplayBuffer
 
 class BatchOptimizer(object):
     def __init__(self, model, batch_size, buffer_size):
@@ -8,21 +8,23 @@ class BatchOptimizer(object):
         self.batch_size = batch_size
         self.buffer = ReplayBuffer(buffer_size)
         self.gamma = 0.99
-        self.criterion = torch.nn.functional.smooth_l1_loss
-        self.optimizer = torch.optim.SGD(model, lr=0.01)
+        self.criterion = torch.nn.SmoothL1Loss()
+        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
     def update(self, obs_t, action, reward, obs_tp1, done):
         self.buffer.add(obs_t, action, reward, obs_tp1, done)
         obs_ts, actions, rewards, obs_tp1s, dones = self.buffer.sample(self.batch_size)
 
         # compute next state values
-        model.eval()
-        tp1_actions = model(obs_tp1s)
-        tp1_values = np.max(tp1_actions, axis=1)
+        self.model.eval()
+        obs_tp1s.volatile = True
+        tp1_actions = self.model(obs_tp1s)
+        tp1_values = torch.max(tp1_actions)
 
         # now go through each observation and get expected values
-        model.train()
-        state_action_values = model(obs_ts).gather(1, actions)
+        self.model.train()
+        predictions = self.model(obs_ts)
+        state_action_values = predictions.gather(1, actions.view(-1,1))
 
         # set target and find the loss
         target_values = rewards + self.gamma * tp1_values

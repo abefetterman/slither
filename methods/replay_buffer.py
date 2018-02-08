@@ -4,7 +4,6 @@ import torch
 from torch.autograd import Variable
 
 def wrap(arr):
-    # return np.array(arr)
     return Variable(torch.cat(arr))
 
 class ReplayBuffer(object):
@@ -32,14 +31,18 @@ class ReplayBuffer(object):
     def _encode_sample(self, idxes):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
         for i in idxes:
-            obs_t, action, reward, obs_tp1, done = self._storage[i]
-            obses_t.append(np.array(obs_t, copy=False))
-            actions.append(np.array(action, copy=False))
-            rewards.append(reward)
-            obses_tp1.append(np.array(obs_tp1, copy=False))
-            dones.append(done)
+            data = self._storage[i]
+            obs_t, action, reward, obs_tp1, done = data
+            obses_t.append(torch.FloatTensor(obs_t))
+            actions.append(torch.LongTensor([action]))
+            rewards.append(torch.FloatTensor([reward]))
+            obses_tp1.append(torch.FloatTensor(obs_tp1))
+            dones.append(torch.LongTensor([done]))
         return wrap(obses_t), wrap(actions), wrap(rewards), wrap(obses_tp1), wrap(dones)
 
     def sample(self, batch_size):
-        idxes = np.random.randint(0, len(self._storage) - 1, batch_size)
+        if len(self._storage) > batch_size:
+            idxes = np.random.randint(0, len(self._storage) - 1, batch_size)
+        else:
+            idxes = np.arange(len(self._storage))
         return self._encode_sample(idxes)
