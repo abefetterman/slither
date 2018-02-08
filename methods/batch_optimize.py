@@ -7,9 +7,9 @@ class BatchOptimizer(object):
         self.model = model
         self.batch_size = batch_size
         self.buffer = ReplayBuffer(buffer_size)
-        self.gamma = 0.8
+        self.gamma = 0.9
         self.criterion = torch.nn.SmoothL1Loss()
-        self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     def update(self, obs_t, action, reward, obs_tp1, done):
         self.buffer.add(obs_t, action, reward, obs_tp1, done)

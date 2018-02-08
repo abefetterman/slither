@@ -9,9 +9,9 @@ import torch
 env = SnakeEnv()
 model = DQN()
 policy = EpsPolicy(model)
-optimizer = BatchOptimizer(model, 10, 1000)
+optimizer = BatchOptimizer(model, 100, 100000)
 
-for i in range(0,2000):
+for i in range(0,10000):
     state_hwc = env.reset()
     state = HWC_to_BCHW(state_hwc)
     while True:
