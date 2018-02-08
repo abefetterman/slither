@@ -32,7 +32,7 @@ for i in range(0,10000):
         action = policy.get(state, i)
         new_state_hwc, reward, done, _ = env.step(action)
         # env.render()
-        total_reward += reward + 1
+        total_reward += reward
         new_state = tensorize(new_state_hwc)
         optimizer.update(state, action, reward, new_state, done)
         state = new_state

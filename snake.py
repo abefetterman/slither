@@ -101,7 +101,7 @@ class SnakeEnv(gym.Env):
                 self.snake.pop()
         else:
             reward = -1.0
-            
+
         return self._update_state(), reward, done, {}
 
     def _snake_color(self,x,y):
@@ -165,6 +165,8 @@ if __name__=="__main__":
                 total_reward += r
                 steps += 1
                 env.render()
+                if (steps % 20 == 0):
+                    print('step {0} score: {1:.2f}'.format(steps, total_reward))
                 if (restart or done): break
     except (KeyboardInterrupt):
         env.close()
