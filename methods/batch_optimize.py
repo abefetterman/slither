@@ -3,13 +3,14 @@ import torch
 from methods.replay_buffer import ReplayBuffer
 
 class BatchOptimizer(object):
-    def __init__(self, model, batch_size, buffer_size):
+    def __init__(self, model, batch_size, buffer_size, cuda=False):
         self.model = model
         self.batch_size = batch_size
-        self.buffer = ReplayBuffer(buffer_size)
+        self.buffer = ReplayBuffer(buffer_size, cuda=cuda)
         self.gamma = 0.9
         self.criterion = torch.nn.SmoothL1Loss()
         self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+        self.cuda = cuda
 
     def update(self, obs_t, action, reward, obs_tp1, done):
         self.buffer.add(obs_t, action, reward, obs_tp1, done)
