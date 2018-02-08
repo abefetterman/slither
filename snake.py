@@ -76,6 +76,7 @@ class SnakeEnv(gym.Env):
 
         done = False
         reward = 0.0
+        if done: reward = -1.0
 
         # check for wall hit
         if (head[0] < 0 or head[0] >= STATE_W):

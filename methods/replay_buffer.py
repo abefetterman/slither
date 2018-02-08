@@ -17,7 +17,7 @@ class ReplayBuffer(object):
 
     def add(self, obs_t, action, reward, obs_tp1, done):
         data = (obs_t, action, reward, obs_tp1, done)
-        # IDEA: Maybe change to numpy buffers so we can just
+        # IDEA: Maybe change to giant tensors so we can just
         # slice out the elements for sampling
 
         if self._next_idx >= len(self._storage):

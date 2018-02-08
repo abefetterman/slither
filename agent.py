@@ -1,19 +1,25 @@
 import gym
 from snake import SnakeEnv
-from methods.scheduler import LinearSchedule
 from models.dqn import DQN
 from methods.utils import HWC_to_BCHW
 from methods.batch_optimize import BatchOptimizer
+from methods.policy import EpsPolicy
 import torch
 
 env = SnakeEnv()
-eps = LinearSchedule(1000, 1.0, .01)
 model = DQN()
+policy = EpsPolicy(model)
 optimizer = BatchOptimizer(model, 10, 1000)
 
-state_hwc = env.reset()
-for i in range(0,2):
-    action = 1
-    new_state_hwc, reward, done, _ = env.step(action)
-    optimizer.update(HWC_to_BCHW(state_hwc), action, reward, HWC_to_BCHW(new_state_hwc), done)
-    state_hwc = new_state_hwc
+for i in range(0,2000):
+    state_hwc = env.reset()
+    state = HWC_to_BCHW(state_hwc)
+    while True:
+        action = policy.get(state, i)
+        new_state_hwc, reward, done, _ = env.step(action)
+        env.render()
+        new_state = HWC_to_BCHW(new_state_hwc)
+        optimizer.update(state, action, reward, new_state, done)
+        state = new_state
+        if done:
+            break

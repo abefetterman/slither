@@ -7,7 +7,7 @@ class BatchOptimizer(object):
         self.model = model
         self.batch_size = batch_size
         self.buffer = ReplayBuffer(buffer_size)
-        self.gamma = 0.99
+        self.gamma = 0.8
         self.criterion = torch.nn.SmoothL1Loss()
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
