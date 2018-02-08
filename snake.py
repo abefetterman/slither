@@ -75,7 +75,7 @@ class SnakeEnv(gym.Env):
         head = (cx + dx, cy + dy)
 
         done = False
-        reward = -0.01
+        reward = 0.01
 
         # check for wall hit
         if (head[0] < 0 or head[0] >= STATE_W):
@@ -100,7 +100,7 @@ class SnakeEnv(gym.Env):
             while (len(self.snake) > self.snake_length):
                 self.snake.pop()
         else:
-            reward = -1.0
+            reward = 0.0
 
         return self._update_state(), reward, done, {}
 

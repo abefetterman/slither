@@ -28,7 +28,7 @@ class ReplayBuffer(object):
         self.obses_tp1 = self.FloatTensor(*obses_size).zero_()
         self.actions = self.LongTensor(*actions_size).zero_()
         self.rewards = self.FloatTensor(self._size, 1).zero_()
-        self.dones = self.LongTensor(self._size, 1).zero_()
+        self.dones = self.FloatTensor(self._size, 1).zero_()
         self._buffer_size = 0
 
     def add(self, obs_t, action, reward, obs_tp1, done):

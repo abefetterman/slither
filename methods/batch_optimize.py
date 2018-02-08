@@ -30,7 +30,7 @@ class BatchOptimizer(object):
         state_action_values = predictions.gather(1, actions.view(-1,1))
 
         # set target and find the loss
-        target_values = rewards + self.gamma * tp1_values
+        target_values = rewards + self.gamma * tp1_values * (1.0 - dones)
         loss = self.criterion(state_action_values, target_values)
 
         # optimize the model

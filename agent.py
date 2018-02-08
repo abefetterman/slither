@@ -5,7 +5,7 @@ from methods.batch_optimize import BatchOptimizer
 from methods.policy import EpsPolicy
 import torch
 
-cuda = True
+cuda = False
 env = SnakeEnv()
 model = DQN()
 policy = EpsPolicy(model)
