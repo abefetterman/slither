@@ -4,7 +4,7 @@ from torch.autograd import Variable
 
 class EpsPolicy(object):
     def __init__(self, model):
-        self.schedule = ExpoSchedule(100, 1.0, .1)
+        self.schedule = ExpoSchedule(10000, 1.0, .1)
         self.model = model
     def get(self, state, t):
         eps = self.schedule.at(t)

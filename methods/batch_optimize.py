@@ -11,7 +11,7 @@ class BatchOptimizer(object):
         self.criterion = torch.nn.SmoothL1Loss()
         if cuda:
             self.criterion = self.criterion.cuda()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
         self.cuda = cuda
 
     def update(self, obs_t, action, reward, obs_tp1, done):

@@ -5,10 +5,10 @@ from gym.utils import seeding
 import numpy as np
 import pyglet
 
-STATE_W = 15
-STATE_H = 15
-BLOCK_SIZE = 20
-BORDER_SIZE = 20
+STATE_W = 8
+STATE_H = 8
+BLOCK_SIZE = 30
+BORDER_SIZE = 30
 WINDOW_W = STATE_W*BLOCK_SIZE + 2*BORDER_SIZE
 WINDOW_H = STATE_H*BLOCK_SIZE + 2*BORDER_SIZE
 
@@ -75,7 +75,7 @@ class SnakeEnv(gym.Env):
         head = (cx + dx, cy + dy)
 
         done = False
-        reward = 0.01
+        reward = -.001
 
         # check for wall hit
         if (head[0] < 0 or head[0] >= STATE_W):
@@ -110,7 +110,7 @@ class SnakeEnv(gym.Env):
     def _update_state(self):
         self.plot_sparse = [(x,y,self._snake_color(x,y)) for x,y in self.snake]
         self.plot_sparse.append((self.food[0], self.food[1], FOOD_COLOR))
-        self.state = self.state*0
+        self.state = self.state*0 + 255
         for x,y,c in self.plot_sparse:
             self.state[x,y]=c
         return self.state

@@ -5,14 +5,15 @@ from methods.batch_optimize import BatchOptimizer
 from methods.policy import EpsPolicy
 import torch
 
-cuda = False
+cuda = True
 env = SnakeEnv()
-model = DQN()
+model = DQN(8,8)
 policy = EpsPolicy(model)
-optimizer = BatchOptimizer(model, 100, 10000, cuda = cuda)
-print_every = 10
+optimizer = BatchOptimizer(model, 10, 10000, cuda = cuda)
+print_every = 1000
 total_frames = 0
 total_reward = 0
+total_loss = 0
 
 FloatTensor = torch.FloatTensor
 if (cuda):
@@ -21,11 +22,7 @@ if (cuda):
 # converts hwc to bchw:
 tensorize = lambda t: FloatTensor(t.transpose((2,0,1))).unsqueeze(0)
 
-for i in range(0,10000):
-    if (i % print_every == 0):
-        print('{0}: {1} frames, reward: {2:.2f}'.format(i, total_frames, total_reward))
-        total_frames = 0
-        total_reward = 0
+for i in range(0,1000000):
     state_hwc = env.reset()
     state = tensorize(state_hwc)
     while True:
@@ -34,8 +31,14 @@ for i in range(0,10000):
         # env.render()
         total_reward += reward
         new_state = tensorize(new_state_hwc)
-        optimizer.update(state, action, reward, new_state, done)
+        total_loss += optimizer.update(state, action, reward, new_state, done)
         state = new_state
         total_frames+=1
+        if (total_frames % print_every == 0):
+            print('{0}: {1} frames, reward: {2:.2f}, loss: {3}'.format(i, total_frames, total_reward, total_loss))
+            total_frames = 0
+            total_reward = 0
+            total_loss = 0
+
         if done:
             break
