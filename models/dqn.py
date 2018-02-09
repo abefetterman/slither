@@ -13,7 +13,7 @@ def conv_size(h,w,conv):
 
 class DQN(nn.Module):
 
-    def __init__(self, h=15, w=15):
+    def __init__(self, h, w):
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         conv1_h, conv1_w = conv_size(h,w,self.conv1)

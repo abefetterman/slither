@@ -1,10 +1,9 @@
 import numpy as np
-from methods.scheduler import ExpoSchedule
 from torch.autograd import Variable
 
 class EpsPolicy(object):
-    def __init__(self, model):
-        self.schedule = ExpoSchedule(10000, 1.0, .1)
+    def __init__(self, model, schedule):
+        self.schedule = schedule
         self.model = model
     def get(self, state, t):
         eps = self.schedule.at(t)

@@ -5,12 +5,8 @@ from gym.utils import seeding
 import numpy as np
 import pyglet
 
-STATE_W = 8
-STATE_H = 8
 BLOCK_SIZE = 30
 BORDER_SIZE = 30
-WINDOW_W = STATE_W*BLOCK_SIZE + 2*BORDER_SIZE
-WINDOW_H = STATE_H*BLOCK_SIZE + 2*BORDER_SIZE
 
 INIT_SNAKE_LENGTH = 3
 BORDER_COLOR = (0,0,0)
@@ -31,15 +27,17 @@ class SnakeEnv(gym.Env):
         'video.frames_per_second': 5
     }
 
-    def __init__(self):
+    def __init__(self, h, w):
         self.viewer = None
         self.snake = None
+        self.state_h = h
+        self.state_w = w
 
         self.action_space = spaces.Discrete(4) #u, d, l, r
-        self.observation_space = spaces.Box(low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8)
+        self.observation_space = spaces.Box(low=0, high=255, shape=(h, w, 3), dtype=np.uint8)
 
         self.plot_sparse = []
-        self.state = np.zeros((STATE_H, STATE_W, 3), dtype=np.uint8)
+        self.state = np.zeros((h, w, 3), dtype=np.uint8)
         self.seed()
         self.reset()
 
@@ -49,8 +47,8 @@ class SnakeEnv(gym.Env):
 
     def reset(self):
         length = INIT_SNAKE_LENGTH
-        init_x = self.np_random.randint(STATE_W - 2*length) + length
-        init_y = self.np_random.randint(STATE_H - 2*length) + length
+        init_x = self.np_random.randint(self.state_w - 2*length) + length
+        init_y = self.np_random.randint(self.state_h - 2*length) + length
 
         self.snake = [(init_x, init_y)]
         self.snake_length = length
@@ -62,8 +60,8 @@ class SnakeEnv(gym.Env):
     def _place_food(self):
         self.food = self.snake[0]
         while self.food in self.snake:
-            food_x = self.np_random.randint(STATE_W)
-            food_y = self.np_random.randint(STATE_H)
+            food_x = self.np_random.randint(self.state_w)
+            food_y = self.np_random.randint(self.state_h)
             self.food = (food_x, food_y)
 
     def step(self, action):
@@ -78,9 +76,9 @@ class SnakeEnv(gym.Env):
         reward = -.001
 
         # check for wall hit
-        if (head[0] < 0 or head[0] >= STATE_W):
+        if (head[0] < 0 or head[0] >= self.state_w):
             done = True
-        if (head[1] < 0 or head[1] >= STATE_H):
+        if (head[1] < 0 or head[1] >= self.state_h):
             done = True
 
         # check for self hit
@@ -119,10 +117,12 @@ class SnakeEnv(gym.Env):
 
         if self.viewer is None:
             import rendering
-            self.viewer = rendering.Viewer(WINDOW_W, WINDOW_H)
-            border = rendering.Border(WINDOW_W, WINDOW_H, BORDER_SIZE, BORDER_COLOR)
+            window_w = self.state_w*BLOCK_SIZE + 2*BORDER_SIZE
+            window_h = self.state_h*BLOCK_SIZE + 2*BORDER_SIZE
+            self.viewer = rendering.Viewer(window_w, window_h)
+            border = rendering.Border(window_w, window_h, BORDER_SIZE, BORDER_COLOR)
             self.plotter = rendering.Plotter(
-                WINDOW_W, WINDOW_H, BORDER_SIZE, STATE_W, STATE_H
+                window_w, window_h, BORDER_SIZE, self.state_w, self.state_h
             )
             self.viewer.add_geom(border)
             self.viewer.add_geom(self.plotter)
