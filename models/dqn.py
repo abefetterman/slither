@@ -20,10 +20,12 @@ class DQN(nn.Module):
         self.conv2 = nn.Conv2d(32, 32, kernel_size=4, stride=2)
         conv2_h, conv2_w = conv_size(conv1_h, conv1_w, self.conv2)
         #print('h:{}, w:{}'.format(conv1_h, conv1_w))
-        self.head = nn.Linear(conv2_h*conv2_w*32, 4)
+        self.hidden1 = nn.Linear(conv2_h*conv2_w*32, 512)
+        self.head = nn.Linear(512, 4)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
+        x = F.relu(self.hidden(x.view(x.size(0), -1)))
         #print(x.size())
-        return self.head(x.view(x.size(0), -1))
+        return self.head(x)

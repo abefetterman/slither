@@ -108,7 +108,7 @@ class SnakeEnv(gym.Env):
     def _update_state(self):
         self.plot_sparse = [(x,y,self._snake_color(x,y)) for x,y in self.snake]
         self.plot_sparse.append((self.food[0], self.food[1], FOOD_COLOR))
-        self.state = self.state*0 + 255
+        self.state = self.state*0
         for x,y,c in self.plot_sparse:
             self.state[x,y]=c
         return self.state
@@ -128,9 +128,9 @@ class SnakeEnv(gym.Env):
             self.viewer.add_geom(self.plotter)
             self.transform = rendering.Transform()
 
-
+        return_rgb_array = (mode == 'rgb_array')
         self.plotter.update_points(self.plot_sparse)
-        self.viewer.render()
+        return self.viewer.render(return_rgb_array)
 
 
     def close(self):

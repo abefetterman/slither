@@ -2,6 +2,7 @@
 
 import pyglet
 from pyglet.gl import *
+import numpy as np
 
 RAD2DEG = 57.29577951308232
 
