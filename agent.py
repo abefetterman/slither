@@ -7,10 +7,10 @@ from policies.scheduler import ExpoSchedule
 import torch
 
 cuda = True
-env = SnakeEnv(5,5)
-model = DQN(5,5)
+env = SnakeEnv(8,8)
+model = DQN(8,8)
 criterion = torch.nn.SmoothL1Loss()
-optimizer = torch.optim.Adam(model.parameters(), lr=2e-7)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-8)
 schedule = ExpoSchedule(1000, 1.0, .1)
 policy = EpsPolicy(model, schedule)
 
@@ -20,7 +20,7 @@ if (cuda):
     model = model.cuda()
     criterion = criterion.cuda()
 
-batch = BatchOptimizer(model, criterion, optimizer, 30, 10000, cuda = cuda)
+batch = BatchOptimizer(model, criterion, optimizer, 30, 100000, cuda = cuda)
 
 print_every = 1000
 total_frames = 0
