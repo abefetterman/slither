@@ -3,6 +3,7 @@ import gym
 from gym import spaces
 from gym.utils import seeding
 import numpy as np
+import scipy.ndimage as ndi
 import pyglet
 
 WINDOW_DIM = 84
@@ -112,7 +113,7 @@ class SnakeEnv(gym.Env):
         self.state = self.state*0
         for x,y,c in self.plot_sparse:
             self.state[x,y]=c
-        return self.state
+        return ndi.zoom(self.state, (10,10,1), order=0)
 
     def render(self, mode='human'):
 

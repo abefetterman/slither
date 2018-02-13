@@ -8,9 +8,9 @@ import torch
 
 cuda = False
 env = SnakeEnv(8,8)
-model = DQN(84,84, batch_norm=True)
+model = DQN(80,80, batch_norm=True)
 criterion = torch.nn.SmoothL1Loss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-5)
 schedule = ExpoSchedule(1000, 1.0, .1)
 policy = EpsPolicy(model, schedule)
 
@@ -33,14 +33,14 @@ tensorize = lambda t: FloatTensor(t.transpose((2,0,1)).copy()).unsqueeze(0)
 
 for i in range(0,10000):
     state_hwc = env.reset()
-    arr = env.render(mode='rgb_array')
-    state = tensorize(arr)
+    # arr = env.render(mode='rgb_array')
+    state = tensorize(state_hwc)
     while True:
         action = policy.get(state, i)
         new_state_hwc, reward, done, _ = env.step(action)
-        arr = env.render(mode='rgb_array')
+        # arr = env.render(mode='rgb_array')
         total_reward += reward
-        new_state = tensorize(arr)
+        new_state = tensorize(state_hwc)
         total_loss += batch.update(state, action, reward, new_state, done)
         state = new_state
         total_frames+=1
