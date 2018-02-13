@@ -5,6 +5,7 @@ from gym.utils import seeding
 import numpy as np
 import pyglet
 
+WINDOW_DIM = 84
 BLOCK_SIZE = 30
 BORDER_SIZE = 30
 
@@ -27,7 +28,7 @@ class SnakeEnv(gym.Env):
         'video.frames_per_second': 5
     }
 
-    def __init__(self, h, w):
+    def __init__(self, h=8, w=8):
         self.viewer = None
         self.snake = None
         self.state_h = h
@@ -73,7 +74,7 @@ class SnakeEnv(gym.Env):
         head = (cx + dx, cy + dy)
 
         done = False
-        reward = -.001
+        reward = 0.0
 
         # check for wall hit
         if (head[0] < 0 or head[0] >= self.state_w):
@@ -98,7 +99,7 @@ class SnakeEnv(gym.Env):
             while (len(self.snake) > self.snake_length):
                 self.snake.pop()
         else:
-            reward = 0.0
+            reward = -1.0
 
         return self._update_state(), reward, done, {}
 
@@ -119,10 +120,14 @@ class SnakeEnv(gym.Env):
             import rendering
             window_w = self.state_w*BLOCK_SIZE + 2*BORDER_SIZE
             window_h = self.state_h*BLOCK_SIZE + 2*BORDER_SIZE
-            self.viewer = rendering.Viewer(window_w, window_h)
-            border = rendering.Border(window_w, window_h, BORDER_SIZE, BORDER_COLOR)
+            state_dim = max(self.state_h, self.state_w)
+            block_size = WINDOW_DIM // (state_dim + 1)
+            border_size = (WINDOW_DIM - state_dim * block_size) // 2
+
+            self.viewer = rendering.Viewer(WINDOW_DIM, WINDOW_DIM)
+            border = rendering.Border(WINDOW_DIM, WINDOW_DIM, border_size, BORDER_COLOR)
             self.plotter = rendering.Plotter(
-                window_w, window_h, BORDER_SIZE, self.state_w, self.state_h
+                WINDOW_DIM, WINDOW_DIM, border_size, self.state_w, self.state_h
             )
             self.viewer.add_geom(border)
             self.viewer.add_geom(self.plotter)
@@ -139,7 +144,7 @@ class SnakeEnv(gym.Env):
 
 if __name__=="__main__":
     env = SnakeEnv()
-    pyglet.clock.set_fps_limit(10)
+    pyglet.clock.set_fps_limit(5)
     from pyglet.window import key
     global a
     a = np.random.randint(4)

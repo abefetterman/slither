@@ -6,11 +6,11 @@ from policies.eps import EpsPolicy
 from policies.scheduler import ExpoSchedule
 import torch
 
-cuda = True
+cuda = False
 env = SnakeEnv(8,8)
-model = DQN(8,8)
+model = DQN(84,84, batch_norm=True)
 criterion = torch.nn.SmoothL1Loss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-8)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 schedule = ExpoSchedule(1000, 1.0, .1)
 policy = EpsPolicy(model, schedule)
 
@@ -20,26 +20,27 @@ if (cuda):
     model = model.cuda()
     criterion = criterion.cuda()
 
-batch = BatchOptimizer(model, criterion, optimizer, 30, 100000, cuda = cuda)
+batch = BatchOptimizer(model, criterion, optimizer, 30, 10000, cuda = cuda)
 
-print_every = 1000
+print_every = 10
 total_frames = 0
 total_reward = 0
 total_loss = 0
 last_game = 0
 
 # converts hwc to bchw:
-tensorize = lambda t: FloatTensor(t.transpose((2,0,1))).unsqueeze(0)
+tensorize = lambda t: FloatTensor(t.transpose((2,0,1)).copy()).unsqueeze(0)
 
-for i in range(0,100000):
+for i in range(0,10000):
     state_hwc = env.reset()
-    state = tensorize(state_hwc)
+    arr = env.render(mode='rgb_array')
+    state = tensorize(arr)
     while True:
         action = policy.get(state, i)
         new_state_hwc, reward, done, _ = env.step(action)
-        # arr = env.render(mode='rgb_array')
+        arr = env.render(mode='rgb_array')
         total_reward += reward
-        new_state = tensorize(new_state_hwc)
+        new_state = tensorize(arr)
         total_loss += batch.update(state, action, reward, new_state, done)
         state = new_state
         total_frames+=1

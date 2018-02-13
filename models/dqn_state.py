@@ -13,29 +13,19 @@ def conv_size(h,w,conv):
 
 class DQN(nn.Module):
 
-    def __init__(self, h, w, batch_norm=False):
+    def __init__(self, h, w):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=8, stride=4)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         conv1_h, conv1_w = conv_size(h,w,self.conv1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=4, stride=2)
         conv2_h, conv2_w = conv_size(conv1_h, conv1_w, self.conv2)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
-        conv3_h, conv3_w = conv_size(conv2_h, conv2_w, self.conv3)
-        self.hidden = nn.Linear(conv3_h*conv3_w*64, 512)
+        #print('h:{}, w:{}'.format(conv1_h, conv1_w))
+        self.hidden = nn.Linear(conv2_h*conv2_w*32, 512)
         self.head = nn.Linear(512, 4)
-        if batch_norm:
-            self.bn1 = nn.BatchNorm2d(32)
-            self.bn2 = nn.BatchNorm2d(64)
-            self.bn3 = nn.BatchNorm2d(64)
-        else:
-            self.bn1 = lambda x: x
-            self.bn2 = lambda x: x
-            self.bn3 = lambda x: x
 
     def forward(self, x):
-        x = F.relu(self.bn1(self.conv1(x)))
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = F.relu(self.bn3(self.conv3(x)))
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         x = F.relu(self.hidden(x.view(x.size(0), -1)))
         #print(x.size())
         return self.head(x)

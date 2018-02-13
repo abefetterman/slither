@@ -10,7 +10,7 @@ class Viewer(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.window = pyglet.window.Window(width=width, height=height)
+        self.window = pyglet.window.Window(width=width, height=height, display=None)
         self.window.on_close = self.window_closed_by_user
         self.isopen = True
         self.geoms = []
