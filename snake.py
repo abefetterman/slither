@@ -110,10 +110,13 @@ class SnakeEnv(gym.Env):
     def _update_state(self):
         self.plot_sparse = [(x,y,self._snake_color(x,y)) for x,y in self.snake]
         self.plot_sparse.append((self.food[0], self.food[1], FOOD_COLOR))
-        self.state = self.state*0
+        self.state = self.state*0 + 255
         for x,y,c in self.plot_sparse:
             self.state[x,y]=c
-        return ndi.zoom(self.state, (10,10,1), order=0)
+        output = np.zeros((90,90,3))
+        output[5:85,5:85]=ndi.zoom(self.state, (10,10,1), order=0)
+
+        return output
 
     def render(self, mode='human'):
 

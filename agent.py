@@ -3,15 +3,15 @@ from snake import SnakeEnv
 from models.dqn import DQN
 from methods.batch_optimize import BatchOptimizer
 from policies.eps import EpsPolicy
-from policies.scheduler import ExpoSchedule
+from policies.scheduler import LinearSchedule
 import torch
 
-cuda = False
+cuda = True
 env = SnakeEnv(8,8)
-model = DQN(80,80, batch_norm=True)
+model = DQN(90,90, batch_norm=True)
 criterion = torch.nn.SmoothL1Loss()
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-5)
-schedule = ExpoSchedule(1000, 1.0, .1)
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+schedule = LinearSchedule(10000, 1.0, .01)
 policy = EpsPolicy(model, schedule)
 
 FloatTensor = torch.FloatTensor
