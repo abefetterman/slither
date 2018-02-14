@@ -25,12 +25,13 @@ class SnakeEnv(gym.Env):
         'video.frames_per_second': 5
     }
 
-    def __init__(self, dim=8, zoom=1, window=300):
+    def __init__(self, dim=8, zoom=1, window=300, rewards=(1.0,0.0,-1.0)):
         self.viewer = None
         self.snake = None
         self.dim = dim
         self.zoom = zoom
         self.window = window
+        self.rewards = rewards # tuple: (eat, step, die)
 
         self.action_space = spaces.Discrete(4) #u, d, l, r
         self.observation_space = spaces.Box(low=0, high=255, shape=(dim, dim, 3), dtype=np.uint8)
@@ -72,7 +73,7 @@ class SnakeEnv(gym.Env):
         head = (cx + dx, cy + dy)
 
         done = False
-        reward = 0.0
+        reward = self.rewards[1]
 
         # check for wall hit
         if (head[0] < 0 or head[0] >= self.dim):
@@ -89,7 +90,7 @@ class SnakeEnv(gym.Env):
 
             # eat food
             if (head == self.food):
-                reward = 1.0
+                reward = self.rewards[0]
                 self.snake_length += 2
                 self._place_food()
 
@@ -97,7 +98,7 @@ class SnakeEnv(gym.Env):
             while (len(self.snake) > self.snake_length):
                 self.snake.pop()
         else:
-            reward = -1.0
+            reward = self.rewards[2]
 
         return self._update_state(), reward, done, {}
 

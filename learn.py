@@ -61,7 +61,7 @@ try:
                 break
         if (i % save_every == 0):
             filename = '{}checkpoint{}.pt'.format(save_dir, i // save_every)
-            torch.save(model, filename)
-    torch.save('{}final.pt'.format(save_dir))
+            torch.save(model.state_dict(), filename)
+    torch.save(model.state_dict(), '{}final.pt'.format(save_dir))
 except KeyboardInterrupt:
-    torch.save(model, '{}interrupted.pt'.format(save_dir))
+    torch.save(model.state_dict(), '{}interrupted.pt'.format(save_dir))
