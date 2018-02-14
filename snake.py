@@ -29,17 +29,18 @@ class SnakeEnv(gym.Env):
         'video.frames_per_second': 5
     }
 
-    def __init__(self, h=8, w=8):
+    def __init__(self, h=8, w=8, zoom=10):
         self.viewer = None
         self.snake = None
         self.state_h = h
         self.state_w = w
+        self.zoom = zoom
 
         self.action_space = spaces.Discrete(4) #u, d, l, r
         self.observation_space = spaces.Box(low=0, high=255, shape=(h, w, 3), dtype=np.uint8)
 
         self.plot_sparse = []
-        self.state = np.zeros((h, w, 3), dtype=np.uint8)
+        self.state = np.zeros((h+2, w+2, 3), dtype=np.uint8)
         self.seed()
         self.reset()
 
@@ -110,36 +111,36 @@ class SnakeEnv(gym.Env):
     def _update_state(self):
         self.plot_sparse = [(x,y,self._snake_color(x,y)) for x,y in self.snake]
         self.plot_sparse.append((self.food[0], self.food[1], FOOD_COLOR))
-        self.state = self.state*0 + 255
+        self.state = self.state*0
+        self.state[1:-1,1:-1,:]=255
         for x,y,c in self.plot_sparse:
-            self.state[x,y]=c
-        output = np.zeros((90,90,3))
-        output[5:85,5:85]=ndi.zoom(self.state, (10,10,1), order=0)
+            self.state[x+1,y+1]=c
 
-        return output
+        return ndi.zoom(self.state, (self.zoom, self.zoom, 1), order=0)
 
     def render(self, mode='human'):
 
         if self.viewer is None:
             import rendering
-            window_w = self.state_w*BLOCK_SIZE + 2*BORDER_SIZE
-            window_h = self.state_h*BLOCK_SIZE + 2*BORDER_SIZE
-            state_dim = max(self.state_h, self.state_w)
-            block_size = WINDOW_DIM // (state_dim + 1)
-            border_size = (WINDOW_DIM - state_dim * block_size) // 2
+            # window_w = self.state_w*BLOCK_SIZE + 2*BORDER_SIZE
+            # window_h = self.state_h*BLOCK_SIZE + 2*BORDER_SIZE
+            # state_dim = max(self.state_h, self.state_w)
+            # block_size = WINDOW_DIM // (state_dim + 1)
+            # border_size = (WINDOW_DIM - state_dim * block_size) // 2
+            #
+            # self.viewer = rendering.Viewer(WINDOW_DIM, WINDOW_DIM)
+            # border = rendering.Border(WINDOW_DIM, WINDOW_DIM, border_size, BORDER_COLOR)
+            # self.plotter = rendering.Plotter(
+            #     WINDOW_DIM, WINDOW_DIM, border_size, self.state_w, self.state_h
+            # )
+            # self.viewer.add_geom(border)
+            # self.viewer.add_geom(self.plotter)
+            # self.transform = rendering.Transform()
+            self.viewer = rendering.SimpleImageViewer()
 
-            self.viewer = rendering.Viewer(WINDOW_DIM, WINDOW_DIM)
-            border = rendering.Border(WINDOW_DIM, WINDOW_DIM, border_size, BORDER_COLOR)
-            self.plotter = rendering.Plotter(
-                WINDOW_DIM, WINDOW_DIM, border_size, self.state_w, self.state_h
-            )
-            self.viewer.add_geom(border)
-            self.viewer.add_geom(self.plotter)
-            self.transform = rendering.Transform()
-
-        return_rgb_array = (mode == 'rgb_array')
-        self.plotter.update_points(self.plot_sparse)
-        return self.viewer.render(return_rgb_array)
+        output = ndi.rotate(ndi.zoom(self.state, (self.zoom,self.zoom,1), order=0), 90)
+        self.viewer.imshow(output)
+        return output
 
 
     def close(self):
