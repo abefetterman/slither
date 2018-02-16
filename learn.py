@@ -1,6 +1,6 @@
 import gym
 from snake import SnakeEnv
-from models.dqn import DQN
+from models.dqn_state import DQN
 from methods.batch_optimize import BatchOptimizer
 from policies.eps import EpsPolicy
 from policies.scheduler import ExpoSchedule
@@ -9,11 +9,11 @@ import os
 
 cuda = torch.cuda.is_available()
 dim = 12
-zoom = 8
+zoom = 1
 env = SnakeEnv(dim=dim, zoom=zoom)
 model = DQN((dim + 2)*zoom,(dim + 2)*zoom, batch_norm=True)
 criterion = torch.nn.SmoothL1Loss()
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
 schedule = ExpoSchedule(10000, 1.0, .5)
 policy = EpsPolicy(model, schedule)
 
@@ -47,7 +47,7 @@ try:
             action = policy.get(state, i)
             new_state_hwc, reward, done, _ = env.step(action)
             total_reward += reward
-            new_state = tensorize(state_hwc)
+            new_state = tensorize(new_state_hwc)
             total_loss += batch.update(state, action, reward, new_state, done)
             state = new_state
             total_frames+=1
